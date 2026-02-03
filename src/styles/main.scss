@@ -1,0 +1,17 @@
+@import "./variables.scss";
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background-color: $背景色;
+  font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+  color: #333;
+}
+
+.遊戲容器 {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+}
