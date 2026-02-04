@@ -6,17 +6,11 @@ function get_env(env: string): boolean {
 }
 
 function apiUrl(): string {
-    if (get_env("local")) {
-        return import.meta.env.VITE_API_LOCAL;
-    } else if (get_env("dev")) {
-        return import.meta.env.VITE_API_DEV;
-    } else if (get_env("uat")) {
-        return import.meta.env.VITE_API_UAT;
-    } else if (get_env("prod")) {
-        return import.meta.env.VITE_API_PROD;
+    if (import.meta.env.PROD) {
+        return import.meta.env.VITE_API_PROD || "";
     }
-    // 預設回傳 local
-    return import.meta.env.VITE_API_LOCAL || "";
+    // 如果是開發環境 (npm run dev)
+    return import.meta.env.VITE_API_LOCAL;
 }
 
 // 簡單的 Fetch 封裝
