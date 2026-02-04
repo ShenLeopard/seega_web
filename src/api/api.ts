@@ -1,15 +1,9 @@
-// src/api/api.ts
-
-function get_env(env: string): boolean {
-    // 判斷標題是否包含指定環境關鍵字
-    return document.title.toLowerCase().includes(env);
-}
-
 function apiUrl(): string {
+    // Vite 自動判斷是否為正式環境 (npm run build)
     if (import.meta.env.PROD) {
         return import.meta.env.VITE_API_PROD || "";
     }
-    // 如果是開發環境 (npm run dev)
+    // 開發環境 (npm run dev)
     return import.meta.env.VITE_API_LOCAL;
 }
 
@@ -22,6 +16,11 @@ export default {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         return await response.json();
     }
 };
