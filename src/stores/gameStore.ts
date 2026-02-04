@@ -97,7 +97,7 @@ export const useGameStore = defineStore('game', {
           board: this.board,
           currentPlayer: this.currentPlayer,
           phase: this.phase,
-          difficulty: 4,
+          difficulty: 6,
           lastMoveX: this.lastMoves.X,
           lastMoveO: this.lastMoves.O,
           moveIndex: nextIdx
