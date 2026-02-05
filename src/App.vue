@@ -2,6 +2,16 @@
 import { computed } from "vue";
 import { useGameStore } from "./stores/gameStore";
 
+const formatPos = (r: number, c: number) => {
+  const row = String.fromCharCode(65 + r); // 0->A, 1->B...
+  const col = c + 1; // 0->1, 1->2...
+  return `${row}${col}`;
+};
+
+const selectedCoord = computed(() => {
+  if (!store.selectedPiece) return "";
+  return formatPos(store.selectedPiece.r, store.selectedPiece.c);
+});
 const store = useGameStore();
 const isCenter = (r: number, c: number) => r === 2 && c === 2;
 
@@ -31,8 +41,12 @@ const handleRestart = () => store.prepareNewGame();
       <aside class="側邊欄">
         <div class="玩家卡片 橘隊" :class="{ 啟用: store.currentPlayer === 'O' }">
           <div class="頭像 橘色棋子"></div>
-          <div class="資訊區"><h3>橘隊 (O)</h3><p>MY TEAM</p></div>
-          <button @click="store.triggerAi" :disabled="store.isAiProcessing || !!store.winner || store.currentPlayer !== 'O'">
+          <div class="資訊區">
+            <h3>橘隊 (O)</h3>
+            <p>MY TEAM</p>
+          </div>
+          <button @click="store.triggerAi"
+            :disabled="store.isAiProcessing || !!store.winner || store.currentPlayer !== 'O'">
             {{ store.isAiProcessing && store.currentPlayer === "O" ? "思考中..." : "AI 代打" }}
           </button>
         </div>
@@ -42,27 +56,24 @@ const handleRestart = () => store.prepareNewGame();
       <section class="中央區">
         <div class="棋盤外框">
           <div class="橫向座標列">
-            <div v-for="n in 5" :key="'h-' + n" class="座標數字">{{ n - 1 }}</div>
+            <div v-for="n in 5" :key="'h-' + n" class="座標數字">{{ n }}</div>
           </div>
           <div class="棋盤核心行">
             <div class="縱向座標列">
-              <div v-for="n in 5" :key="'v-' + n" class="座標數字">{{ n - 1 }}</div>
+              <div v-for="r in 5" :key="'v-' + r" class="座標數字">
+                {{ String.fromCharCode(64 + r) }}
+              </div>
             </div>
-
             <div class="網格系統">
               <template v-for="(row, r) in store.board" :key="'row-' + r">
-                <div v-for="(cell, c) in row" :key="'cell-' + r + '-' + c"
-                     class="棋格"
-                     :class="{
-                        '中心點': isCenter(r, c),
-                        '被選中': store.selectedPiece?.r === r && store.selectedPiece?.c === c,
-                        '可移動提示': store.isAdjacentEmpty(r, c),
-                        '可移除目標': store.phase === 'STUCK_REMOVAL' && store.isOpponent(r, c)
-                     }"
-                     @mouseenter="store.setHover(r, c)"
-                     @mouseleave="store.clearHover()"
-                     @click="store.handleCellClick(r, c)">
-                  
+                <div v-for="(cell, c) in row" :key="'cell-' + r + '-' + c" class="棋格" :class="{
+                  '中心點': isCenter(r, c),
+                  '被選中': store.selectedPiece?.r === r && store.selectedPiece?.c === c,
+                  '可移動提示': store.isAdjacentEmpty(r, c),
+                  '可移除目標': store.phase === 'STUCK_REMOVAL' && store.isOpponent(r, c)
+                }" @mouseenter="store.setHover(r, c)" @mouseleave="store.clearHover()"
+                  @click="store.handleCellClick(r, c)">
+
                   <!-- 實體棋子 -->
                   <div v-if="cell" class="棋子" :class="cell === 'O' ? '橘棋' : '黑棋'"></div>
                   <div v-else-if="isCenter(r, c)" class="圖示">⚓</div>
@@ -70,12 +81,13 @@ const handleRestart = () => store.prepareNewGame();
                   <!-- 改進後的預覽容器 (絕對定位在棋格內) -->
                   <div class="預覽容器">
                     <!-- 1. 佈陣階段：滑鼠指到的格子顯示透明棋子 -->
-                    <div v-if="store.phase === 'PLACEMENT' && !cell && store.hoverPos?.r === r && store.hoverPos?.c === c && !isCenter(r, c)"
-                         class="透明預覽" :class="store.currentPlayer === 'O' ? '橘預覽' : '黑預覽'">
+                    <div
+                      v-if="store.phase === 'PLACEMENT' && !cell && store.hoverPos?.r === r && store.hoverPos?.c === c && !isCenter(r, c)"
+                      class="透明預覽" :class="store.currentPlayer === 'O' ? '橘預覽' : '黑預覽'">
                     </div>
                     <!-- 2. 移動階段：選中棋子後，周圍空格顯示透明路徑提示 -->
-                    <div v-if="store.phase === 'MOVEMENT' && !cell && store.isAdjacentEmpty(r, c)"
-                         class="透明預覽" :class="store.currentPlayer === 'O' ? '橘預覽' : '黑預覽'">
+                    <div v-if="store.phase === 'MOVEMENT' && !cell && store.isAdjacentEmpty(r, c)" class="透明預覽"
+                      :class="store.currentPlayer === 'O' ? '橘預覽' : '黑預覽'">
                     </div>
                   </div>
                 </div>
@@ -92,8 +104,12 @@ const handleRestart = () => store.prepareNewGame();
       <aside class="側邊欄">
         <div class="玩家卡片 黑隊" :class="{ 啟用: store.currentPlayer === 'X' }">
           <div class="頭像 黑色棋子"></div>
-          <div class="資訊區"><h3>黑隊 (X)</h3><p>OPPONENT</p></div>
-          <button @click="store.triggerAi" :disabled="store.isAiProcessing || !!store.winner || store.currentPlayer !== 'X'">
+          <div class="資訊區">
+            <h3>黑隊 (X)</h3>
+            <p>OPPONENT</p>
+          </div>
+          <button @click="store.triggerAi"
+            :disabled="store.isAiProcessing || !!store.winner || store.currentPlayer !== 'X'">
             {{ store.isAiProcessing && store.currentPlayer === "X" ? "思考中..." : "AI 行動" }}
           </button>
         </div>
@@ -107,7 +123,8 @@ const handleRestart = () => store.prepareNewGame();
     </main>
 
     <phase-transition :active="store.showPhaseTransition" @finished="store.showPhaseTransition = false" />
-    <victory-overlay :is-active="!!store.winner" :winner-name="winnerDisplay" @restart="handleRestart" @close="store.winner = null" />
+    <victory-overlay :is-active="!!store.winner" :winner-name="winnerDisplay" @restart="handleRestart"
+      @close="store.winner = null" />
   </div>
 </template>
 
@@ -130,6 +147,7 @@ const handleRestart = () => store.prepareNewGame();
 .頁首 {
   text-align: center;
   margin-bottom: 2.5rem;
+
   .主標題 {
     color: $文字色;
     font-size: 3.5rem;
@@ -138,6 +156,7 @@ const handleRestart = () => store.prepareNewGame();
     margin: 0;
     text-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   }
+
   .階段標籤 {
     display: inline-block;
     padding: 0.4rem 1.5rem;
@@ -147,11 +166,17 @@ const handleRestart = () => store.prepareNewGame();
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     margin-top: 1rem;
     font-size: 0.9rem;
-    
-    &.PLACEMENT { color: $橘隊主色; }
-    &.MOVEMENT { color: $黑隊主色; }
-    &.STUCK_REMOVAL { 
-      color: #ef4444; 
+
+    &.PLACEMENT {
+      color: $橘隊主色;
+    }
+
+    &.MOVEMENT {
+      color: $黑隊主色;
+    }
+
+    &.STUCK_REMOVAL {
+      color: #ef4444;
       background: #fff1f2;
       animation: blink 1s infinite;
     }
@@ -190,8 +215,14 @@ const handleRestart = () => store.prepareNewGame();
     opacity: 1;
     transform: scale(1.05);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-    &.橘隊 { border-color: $橘隊主色; }
-    &.黑隊 { border-color: $黑隊主色; }
+
+    &.橘隊 {
+      border-color: $橘隊主色;
+    }
+
+    &.黑隊 {
+      border-color: $黑隊主色;
+    }
   }
 
   .頭像 {
@@ -202,12 +233,29 @@ const handleRestart = () => store.prepareNewGame();
     margin-bottom: 1rem;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   }
-  .橘色棋子 { background: $橘隊主色; }
-  .黑色棋子 { background: $黑隊主色; }
+
+  .橘色棋子 {
+    background: $橘隊主色;
+  }
+
+  .黑色棋子 {
+    background: $黑隊主色;
+  }
 
   .資訊區 {
-    h3 { color: $文字色; margin: 0; font-size: 1.4rem; font-weight: 900; }
-    p { font-size: 0.75rem; color: #999; margin: 0.2rem 0 0 0; letter-spacing: 1px; }
+    h3 {
+      color: $文字色;
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 900;
+    }
+
+    p {
+      font-size: 0.75rem;
+      color: #999;
+      margin: 0.2rem 0 0 0;
+      letter-spacing: 1px;
+    }
   }
 
   .狀態提示 {
@@ -237,6 +285,7 @@ const handleRestart = () => store.prepareNewGame();
     &:not(:disabled) {
       background: $文字色;
       color: white;
+
       &:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
@@ -273,6 +322,7 @@ const handleRestart = () => store.prepareNewGame();
   display: flex;
   padding-left: 50px; // 預留空間給左側座標
   margin-bottom: 12px;
+
   .座標數字 {
     width: $棋格大小;
     margin-right: $網格間距;
@@ -293,6 +343,7 @@ const handleRestart = () => store.prepareNewGame();
   flex-direction: column;
   width: 40px;
   margin-right: 10px;
+
   .座標數字 {
     height: $棋格大小;
     margin-bottom: $網格間距;
@@ -335,7 +386,12 @@ const handleRestart = () => store.prepareNewGame();
   &.中心點 {
     background-color: color.adjust($棋格色, $lightness: -10%);
     cursor: default;
-    .圖示 { opacity: 0.15; font-size: 2.2rem; color: $文字色; }
+
+    .圖示 {
+      opacity: 0.15;
+      font-size: 2.2rem;
+      color: $文字色;
+    }
   }
 
   &.被選中 {
@@ -349,6 +405,7 @@ const handleRestart = () => store.prepareNewGame();
 
   &.提示 {
     background-color: rgba(white, 0.25);
+
     &::before {
       content: '';
       position: absolute;
@@ -363,7 +420,10 @@ const handleRestart = () => store.prepareNewGame();
     outline: 5px dashed #ef4444;
     background-color: #fee2e2;
     cursor: crosshair;
-    &:hover { background-color: #fca5a5; }
+
+    &:hover {
+      background-color: #fca5a5;
+    }
   }
 }
 
@@ -374,9 +434,14 @@ const handleRestart = () => store.prepareNewGame();
   border-radius: 50%;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
   z-index: 5;
-  
-  &.橘棋 { background: linear-gradient(135deg, $橘隊主色, color.adjust($橘隊主色, $lightness: -15%)); }
-  &.黑棋 { background: linear-gradient(135deg, #444, $黑隊主色); }
+
+  &.橘棋 {
+    background: linear-gradient(135deg, $橘隊主色, color.adjust($橘隊主色, $lightness: -15%));
+  }
+
+  &.黑棋 {
+    background: linear-gradient(135deg, #444, $黑隊主色);
+  }
 }
 
 .預覽容器 {
@@ -395,14 +460,28 @@ const handleRestart = () => store.prepareNewGame();
   border-radius: 50%;
   opacity: 0.45;
   animation: previewPulse 1.8s infinite ease-in-out;
-  
-  &.橘預覽 { background-color: $橘隊主色; }
-  &.黑預覽 { background-color: $黑隊主色; }
+
+  &.橘預覽 {
+    background-color: $橘隊主色;
+  }
+
+  &.黑預覽 {
+    background-color: $黑隊主色;
+  }
 }
 
 @keyframes previewPulse {
-  0%, 100% { transform: scale(0.88); opacity: 0.3; }
-  50% { transform: scale(1.0); opacity: 0.55; }
+
+  0%,
+  100% {
+    transform: scale(0.88);
+    opacity: 0.3;
+  }
+
+  50% {
+    transform: scale(1.0);
+    opacity: 0.55;
+  }
 }
 
 // 6. 紀錄面板與滑桿
@@ -410,7 +489,7 @@ const handleRestart = () => store.prepareNewGame();
   background: white;
   border-radius: 2.5rem;
   padding: 1.8rem;
-  height: 420px; 
+  height: 420px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
@@ -431,11 +510,17 @@ const handleRestart = () => store.prepareNewGame();
     overflow-y: auto;
     padding-right: 8px;
 
-    &::-webkit-scrollbar { width: 6px; }
-    &::-webkit-scrollbar-thumb { 
-      background: #ddd; 
-      border-radius: 10px; 
-      &:hover { background: #ccc; }
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #ddd;
+      border-radius: 10px;
+
+      &:hover {
+        background: #ccc;
+      }
     }
 
     .條目 {
@@ -454,7 +539,11 @@ const handleRestart = () => store.prepareNewGame();
         color: #b91c1c;
         font-weight: bold;
       }
-      &.info { border-left-color: $橘隊主色; background: #fffbeb; }
+
+      &.info {
+        border-left-color: $橘隊主色;
+        background: #fffbeb;
+      }
     }
   }
 }
@@ -480,16 +569,22 @@ const handleRestart = () => store.prepareNewGame();
     color: $橘隊主色;
     border: 3px solid $橘隊主色;
     box-shadow: 0 10px 25px rgba($橘隊主色, 0.15);
-    
+
     &:hover {
       transform: translateY(-3px);
       background: $橘隊主色;
       color: white;
     }
   }
-  
-  &:disabled { cursor: not-allowed; }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
 }
 
-@keyframes blink { 50% { opacity: 0.6; } }
+@keyframes blink {
+  50% {
+    opacity: 0.6;
+  }
+}
 </style>
