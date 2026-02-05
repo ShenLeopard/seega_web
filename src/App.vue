@@ -2,16 +2,6 @@
 import { computed } from "vue";
 import { useGameStore } from "./stores/gameStore";
 
-const formatPos = (r: number, c: number) => {
-  const row = String.fromCharCode(65 + r); // 0->A, 1->B...
-  const col = c + 1; // 0->1, 1->2...
-  return `${row}${col}`;
-};
-
-const selectedCoord = computed(() => {
-  if (!store.selectedPiece) return "";
-  return formatPos(store.selectedPiece.r, store.selectedPiece.c);
-});
 const store = useGameStore();
 const isCenter = (r: number, c: number) => r === 2 && c === 2;
 
