@@ -577,4 +577,116 @@ const handleRestart = () => store.prepareNewGame();
     opacity: 0.6;
   }
 }
+
+/* --- 行動裝置適應核心 --- */
+
+@media (max-width: 1024px) {
+  .遊戲容器 {
+    padding: 1rem 0.5rem;
+  }
+
+  .主標題 {
+    font-size: 2.2rem !important; // 縮小標題
+    letter-spacing: 0.4rem !important;
+  }
+
+  .遊戲主體 {
+    flex-direction: column; // 橫向變縱向
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .側邊欄 {
+    width: 95%; // 側邊欄改為橫跨螢幕
+    order: 2;   // 調整順序
+
+    &:first-child { order: 1; } // 橘隊在棋盤上
+    &:last-child { order: 3; }  // 黑隊與紀錄在棋盤下
+  }
+
+  // 縮小玩家卡片，改為橫向排列以節省垂直空間
+  .玩家卡片 {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-radius: 1.5rem;
+    transform: scale(1) !important; // 取消手機端的縮放以免跑版
+    
+    .頭像 {
+      width: 45px;
+      height: 45px;
+      margin-bottom: 0;
+    }
+
+    .資訊區 {
+      flex: 1;
+      text-align: left;
+      h3 { font-size: 1.1rem; }
+    }
+
+    button {
+      width: auto;
+      margin-top: 0;
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+    }
+  }
+
+  // 棋盤核心縮放
+  .棋盤外框 {
+    padding: 15px;
+    border-radius: 2rem;
+  }
+
+  .網格系統 {
+    grid-template-columns: repeat(5, var(--cell-size));
+    grid-template-rows: repeat(5, var(--cell-size));
+    gap: var(--board-gap);
+    padding: var(--board-gap);
+    border-radius: 1.2rem;
+  }
+
+  .棋格 {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    border-radius: 0.6rem;
+    
+    &.被選中 {
+      outline-width: 4px;
+    }
+
+    .圖示 { font-size: 1.2rem !important; }
+  }
+
+  .橫向座標列 {
+    padding-left: 35px;
+    .座標數字 { width: var(--cell-size); margin-right: var(--board-gap); font-size: 0.8rem; }
+  }
+
+  .縱向座標列 {
+    width: 25px;
+    .座標數字 { height: var(--cell-size); margin-bottom: var(--board-gap); font-size: 0.8rem; }
+  }
+
+  .紀錄面板 {
+    height: 200px; // 減少紀錄區高度
+    margin-top: 1rem;
+  }
+  
+  .悔棋按鈕 {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    font-size: 1rem;
+    border-radius: 1.2rem;
+  }
+}
+
+// 針對極小螢幕 (如 iPhone SE)
+@media (max-width: 370px) {
+  :root {
+    --cell-size: 15vw;
+  }
+  .主標題 { font-size: 1.8rem !important; }
+}
 </style>

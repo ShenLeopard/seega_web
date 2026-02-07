@@ -18,3 +18,15 @@ $文字色: #78350f;
 
 // 動畫
 $過渡動畫: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+:root {
+  --cell-size: 85px; // 桌面端預設
+  --board-gap: 8px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --cell-size: 16vw; // 手機端根據螢幕寬度自動縮放 (5格約佔 80vw)
+    --board-gap: 4px;
+  }
+}
